@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Námořní klub – Kontrola motoru</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:      #0B2545;
+  --navy-mid:  #13395E;
+  --navy-light:#1A4F82;
+  --gold:      #C9973A;
+  --gold-light:#E8B85A;
+  --cream:     #F5F0E8;
+  --white:     #FFFFFF;
+  --red:       #C0392B;
+  --green:     #1D9E75;
+  --text:      #1a1a2e;
+  --muted:     #5a6a7e;
+  --border:    rgba(11,37,69,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 3rem;
+}
+
+/* ── HERO HEADER ── */
+.hero {
+  background: var(--navy);
+  padding: 2rem 1.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 18px,
+    rgba(255,255,255,0.02) 18px,
+    rgba(255,255,255,0.02) 36px
+  );
+}
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.club-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  margin-bottom: 0.4rem;
+}
+.hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 7vw, 42px);
+  color: var(--white);
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  margin-bottom: 1.2rem;
+}
+.hero h1 span { color: var(--gold-light); }
+
+/* ── PROGRESS ── */
+.progress-bar-wrap {
+  background: rgba(255,255,255,0.12);
+  border-radius: 99px;
+  height: 5px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width 0.35s ease;
+  width: 0%;
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.04em;
+}
+
+/* ── MAIN CONTENT ── */
+.content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 0;
+}
+
+/* ── CHECKLIST CARD ── */
+.card {
+  background: var(--white);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 12px rgba(11,37,69,0.10), 0 0 0 0.5px var(--border);
+}
+
+.card-header {
+  padding: 0.9rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.card-header.before { background: var(--navy); }
+.card-header.after  { background: var(--navy-mid); }
+
+.card-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.card-icon svg { width: 16px; height: 16px; }
+
+.card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  line-height: 1.1;
+}
+.card-sub {
+  font-size: 10px;
+  color: var(--gold-light);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.card-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── ITEMS ── */
+.items { padding: 4px 0; }
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 1.25rem;
+  cursor: pointer;
+  border-top: 0.5px solid rgba(11,37,69,0.07);
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.item:first-child { border-top: none; }
+.item:active { background: rgba(11,37,69,0.04); }
+
+.cb {
+  width: 20px; height: 20px; min-width: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #C5D3E0;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  transition: all 0.18s;
+}
+.item.done .cb {
+  background: var(--green);
+  border-color: var(--green);
+}
+.tick {
+  display: none;
+  width: 11px; height: 11px;
+}
+.item.done .tick { display: block; }
+
+.lbl {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  user-select: none;
+  transition: opacity 0.18s;
+}
+.item.done .lbl {
+  text-decoration: line-through;
+  opacity: 0.35;
+}
+
+/* ── WARNING NOTE ── */
+.note {
+  margin: 0 1.25rem 0;
+  padding: 10px 14px;
+  background: rgba(192,57,43,0.08);
+  border-left: 3px solid var(--red);
+  border-radius: 0 8px 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--red);
+  letter-spacing: 0.02em;
+  line-height: 1.45;
+  margin-bottom: 1.25rem;
+}
+
+/* ── RESET ── */
+.reset-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1.5px solid rgba(11,37,69,0.2);
+  border-radius: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 0.15s;
+}
+.reset-btn:hover { background: rgba(11,37,69,0.05); border-color: var(--navy-light); color: var(--navy); }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+footer strong { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="club-label">⚓ Námořní klub</div>
+    <h1>Kontrola<br><span>Motoru</span></h1>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="prog-fill"></div>
+    </div>
+    <div class="progress-meta">
+      <span id="prog-label">0 položek hotovo</span>
+      <span id="prog-pct">0 %</span>
+    </div>
+  </div>
+</div>
+
+<div class="content" id="content"></div>
+
+<script>
+var CHECKLISTS = [
+  {
+    id: "pred",
+    title: "Kontrola před nastartováním",
+    sub: "Před startem motoru",
+    cls: "before",
+    icon: '<svg viewBox="0 0 16 16" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>',
+    items: [
+      "Palivo v nádrži a kanystru",
+      "Baterie dobité",
+      "Nic z motoru neteče",
+      "Olej v motoru – kontrola",
+      "Olej v převodovce – kontrola",
+      "Promazané těsnění hřídel-trup",
+      "Klínový řemen – kontrola",
+      "Hadice v motoru nesáknou",
+      "Palivový filtr – kontrola",
+      "Slanovodní filtr – kontrola",
+      "Kohout chl. slané vody otevřen",
+      "Chladicí kapalina – dostatek",
+      "Kabely neuvolněné",
+      "Dobíjení píská",
+      "Ve vodě nejsou žádná lana"
+    ]
+  },
+  {
+    id: "po",
+    title: "Kontrola po nastartování",
+    sub: "Po startu motoru",
+    cls: "after",
+    icon: '<svg viewBox="0 0 16 16" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 3 7-7"/></svg>',
+    items: [
+      "Chladící voda cáká z výfuku",
+      "Nesvítí varovné kontrolky",
+      "Z motoru nic neteče",
+      "Motor divně nevibruje",
+      "Nejsou slyšet divné zvuky",
+      "Klínový řemen funguje správně",
+      "Palivo v nádrži OK",
+      "Hadice v motoru nesáknou"
+    ],
+    note: "Nenechte klesnout hladinu paliva v nádrži pod 50 %"
+  }
+];
+
+var TOTAL = CHECKLISTS.reduce(function(s, c){ return s + c.items.length; }, 0);
+var checked = new Set();
+var counters = {};
+
+function save() { try { localStorage.setItem('nm_motor', JSON.stringify([...checked])); } catch(e){} }
+function load() { try { var d = localStorage.getItem('nm_motor'); if(d) checked = new Set(JSON.parse(d)); } catch(e){} }
+
+function updateProgress() {
+  var n = checked.size;
+  var pct = Math.round(n / TOTAL * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = n + ' z ' + TOTAL + ' hotovo';
+  document.getElementById('prog-pct').textContent = pct + ' %';
+  // per-card counts
+  CHECKLISTS.forEach(function(cl) {
+    var el = document.getElementById('count-' + cl.id);
+    if (!el) return;
+    var done = cl.items.filter(function(_, i) {
+      return checked.has(cl.id + '-' + i);
+    }).length;
+    el.textContent = done + ' / ' + cl.items.length;
+  });
+}
+
+function toggle(key) {
+  if (checked.has(key)) checked.delete(key); else checked.add(key);
+  var el = document.querySelector('[data-key="' + key + '"]');
+  if (el) el.classList.toggle('done', checked.has(key));
+  updateProgress(); save();
+}
+
+function resetAll() {
+  checked.clear();
+  document.querySelectorAll('.item').forEach(function(el){ el.classList.remove('done'); });
+  updateProgress(); save();
+}
+
+function render() {
+  load();
+  var container = document.getElementById('content');
+
+  CHECKLISTS.forEach(function(cl) {
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    // header
+    var hdr = document.createElement('div');
+    hdr.className = 'card-header ' + cl.cls;
+    hdr.innerHTML =
+      '<div class="card-icon">' + cl.icon + '</div>' +
+      '<div>' +
+        '<div class="card-sub">' + cl.sub + '</div>' +
+        '<div class="card-title">' + cl.title + '</div>' +
+      '</div>' +
+      '<div class="card-count" id="count-' + cl.id + '">0 / ' + cl.items.length + '</div>';
+    card.appendChild(hdr);
+
+    // items
+    var list = document.createElement('div');
+    list.className = 'items';
+    cl.items.forEach(function(label, i) {
+      var key = cl.id + '-' + i;
+      var row = document.createElement('div');
+      row.className = 'item' + (checked.has(key) ? ' done' : '');
+      row.dataset.key = key;
+      row.innerHTML =
+        '<div class="cb">' +
+          '<svg class="tick" viewBox="0 0 11 11" fill="none">' +
+            '<polyline points="1.5,5.5 4.5,8.5 9.5,2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>' +
+        '</div>' +
+        '<span class="lbl">' + label + '</span>';
+      (function(k){ row.addEventListener('click', function(){ toggle(k); }); })(key);
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    container.appendChild(card);
+
+    // warning note
+    if (cl.note) {
+      var note = document.createElement('div');
+      note.className = 'note';
+      note.textContent = '⚠ ' + cl.note;
+      container.appendChild(note);
+    }
+  });
+
+  // reset button
+  var btn = document.createElement('button');
+  btn.className = 'reset-btn';
+  btn.textContent = 'Resetovat checklist';
+  btn.onclick = resetAll;
+  container.appendChild(btn);
+
+  // footer
+  var ft = document.createElement('footer');
+  ft.innerHTML = '<strong>Námořní klub</strong> &nbsp;·&nbsp; Kontrola motoru';
+  container.appendChild(ft);
+
+  updateProgress();
+}
+
+render();
+</script>
+</body>
+</html>
